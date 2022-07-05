@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .input-normal {
+    @apply col-span-2 input input-sm input-bordered w-full max-w-xs;
+  }
+  .price-item {
+    @apply grid grid-flow-row shadow-md rounded-lg p-4 my-4;
+  }
+}
