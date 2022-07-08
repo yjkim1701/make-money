@@ -25,17 +25,13 @@ enum TrailMode {
 }
 
 model StockInfo {
-  stockCode  String     @db.VarChar(20)
+  stockCode  String     @id @db.VarChar(20)
   stockName  String     @db.VarChar(200)
   marketType MarketType @default(KOSPI)
-
-  tradePlan  TradePlan?
-  notifyItem NotifyItem?
-  @@id([stockCode, stockName])
 }
 
 model TradePlan {
-  id                    String    @id @default(cuid())
+  stockCode             String    @id @db.VarChar(20)
   closeFlag             Boolean   @default(false)
   planDate              DateTime  @default(now())
   planCloseDate         DateTime?
@@ -51,15 +47,11 @@ model TradePlan {
   currentAvgPrice       Int       @default(0)
   currentQuantity       Int       @default(0)
   currentTotalMoney     Int       @default(0)
-
-  stockInfo          StockInfo @relation(fields: [stockInfoStockCode, stockInfoStockName], references: [stockCode, stockName])
-  stockInfoStockCode String
-  stockInfoStockName String
-  @@unique([stockInfoStockCode, stockInfoStockName])
 }
 
 model NotifyItem {
-  id                String         @id @default(cuid())
+  stockCode         String         @id @db.VarChar(20)
+  stockName         String
   targetPrice       Int
   enableTargetPrice Boolean
   vixPercent        Float          @default(3.0)
@@ -71,9 +63,4 @@ model NotifyItem {
   lastNotifyDate    DateTime?
   alarmCondition    AlarmCondition @default(LT)
   trailMode         TrailMode      @default(BUY)
-
-  stockInfo          StockInfo @relation(fields: [stockInfoStockCode, stockInfoStockName], references: [stockCode, stockName])
-  stockInfoStockCode String
-  stockInfoStockName String
-  @@unique([stockInfoStockCode, stockInfoStockName])
 }
