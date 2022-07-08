@@ -24,43 +24,62 @@ enum TrailMode {
   SELL
 }
 
-model StockInfo {
-  stockCode  String     @id @db.VarChar(20)
-  stockName  String     @db.VarChar(200)
-  marketType MarketType @default(KOSPI)
-}
-
 model TradePlan {
-  stockCode             String    @id @db.VarChar(20)
-  closeFlag             Boolean   @default(false)
-  planDate              DateTime  @default(now())
-  planCloseDate         DateTime?
-  tradeCategory         String
-  tradeRating           Int?
-  baseCandleOpenPrice   Int
-  baseCandleClosePrice  Int
-  baseCandleCenterPrice Int
-  baseCandleSize        Float
-  tickPrice             Int
-  transactionAmount     Int?
-  totalAssignedFund     Int?
-  currentAvgPrice       Int       @default(0)
-  currentQuantity       Int       @default(0)
-  currentTotalMoney     Int       @default(0)
+  id            String     @id @default(cuid())
+  closeFlag     Boolean    @default(false)
+  stockCode     String     @db.VarChar(20)
+  stockName     String     @db.VarChar(200)
+  marketType    MarketType @default(KOSPI)
+  planDate      DateTime   @default(now())
+  tradeCategory String
+
+  baseCandleOpenPrice   Int   @default(0)
+  baseCandleClosePrice  Int   @default(0)
+  baseCandleCenterPrice Int   @default(0)
+  baseCandleSize        Float @default(0)
+  tickPrice             Int   @default(0)
+  transactionAmount     Int   @default(0)
+  totalAssignedFund     Int   @default(0)
+  currentAvgPrice       Int   @default(0)
+  currentQuantity       Int   @default(0)
+  currentTotalMoney     Int   @default(0)
+
+  // notify
+  targetPrice               Int            @default(0)
+  targetPriceAlarmCondition AlarmCondition @default(LT)
+  enableTargetPriceAlarm    Boolean        @default(false)
+
+  vixPercent     Float   @default(3.0)
+  enableVixAlarm Boolean @default(true)
+
+  profitPrice       Int     @default(0)
+  profitPercent     Float   @default(0)
+  enableProfitAlarm Boolean @default(true)
+
+  lossCutPrice       Int     @default(0)
+  lossCutPercent     Float   @default(0)
+  enableLossCutAlarm Boolean @default(true)
+
+  lastNotifyPrice Int?
+  lastNotifyDate  DateTime @default(now())
+
+  planCloseDate DateTime?
+  tradeRating   Int?
+
+  // scenario
+  scenario            Scenario[]
+  enableScenarioAlarm Boolean    @default(false)
 }
 
-model NotifyItem {
-  stockCode         String         @id @db.VarChar(20)
-  stockName         String
-  targetPrice       Int
-  enableTargetPrice Boolean
-  vixPercent        Float          @default(3.0)
-  profitPercent     Float
-  profitPrice       Int
-  lossCutPercent    Float
-  lossCutPrice      Int
-  lastNotifyPrice   Int
-  lastNotifyDate    DateTime?
-  alarmCondition    AlarmCondition @default(LT)
-  trailMode         TrailMode      @default(BUY)
+model Scenario {
+  id          String    @id @default(cuid())
+  tradePlanId String
+  step        Int       @default(0)
+  price       Int       @default(0)
+  quantity    Int       @default(0)
+  buyPrice    Int       @default(0)
+  accQuantity Int       @default(0)
+  accMoney    Int       @default(0)
+  weight      Int       @default(0)
+  tradePlan   TradePlan @relation(fields: [tradePlanId], references: [id])
 }
