@@ -8,21 +8,72 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model Post {
-  id        String     @default(cuid()) @id
-  title     String
-  content   String?
-  published Boolean @default(false)
-  author    User?   @relation(fields: [authorId], references: [id])
-  authorId  String?
+enum MarketType {
+  KOSPI
+  KOSDAQ
 }
 
-model User {
-  id            String       @default(cuid()) @id
-  name          String?
-  email         String?   @unique
-  createdAt     DateTime  @default(now()) @map(name: "created_at")
-  updatedAt     DateTime  @updatedAt @map(name: "updated_at")
-  posts         Post[]
-  @@map(name: "users")
+enum AlarmCondition {
+  LT
+  GT
+}
+
+enum TrailMode {
+  DISABLE
+  BUY
+  SELL
+}
+
+model StockInfo {
+  stockCode  String     @db.VarChar(20)
+  stockName  String     @db.VarChar(200)
+  marketType MarketType @default(KOSPI)
+
+  tradePlan  TradePlan?
+  notifyItem NotifyItem?
+  @@id([stockCode, stockName])
+}
+
+model TradePlan {
+  id                    String    @id @default(cuid())
+  closeFlag             Boolean   @default(false)
+  planDate              DateTime  @default(now())
+  planCloseDate         DateTime?
+  tradeCategory         String
+  tradeRating           Int?
+  baseCandleOpenPrice   Int
+  baseCandleClosePrice  Int
+  baseCandleCenterPrice Int
+  baseCandleSize        Float
+  tickPrice             Int
+  transactionAmount     Int?
+  totalAssignedFund     Int?
+  currentAvgPrice       Int       @default(0)
+  currentQuantity       Int       @default(0)
+  currentTotalMoney     Int       @default(0)
+
+  stockInfo          StockInfo @relation(fields: [stockInfoStockCode, stockInfoStockName], references: [stockCode, stockName])
+  stockInfoStockCode String
+  stockInfoStockName String
+  @@unique([stockInfoStockCode, stockInfoStockName])
+}
+
+model NotifyItem {
+  id                String         @id @default(cuid())
+  targetPrice       Int
+  enableTargetPrice Boolean
+  vixPercent        Float          @default(3.0)
+  profitPercent     Float
+  profitPrice       Int
+  lossCutPercent    Float
+  lossCutPrice      Int
+  lastNotifyPrice   Int
+  lastNotifyDate    DateTime?
+  alarmCondition    AlarmCondition @default(LT)
+  trailMode         TrailMode      @default(BUY)
+
+  stockInfo          StockInfo @relation(fields: [stockInfoStockCode, stockInfoStockName], references: [stockCode, stockName])
+  stockInfoStockCode String
+  stockInfoStockName String
+  @@unique([stockInfoStockCode, stockInfoStockName])
 }
